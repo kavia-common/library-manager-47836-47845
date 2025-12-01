@@ -8,8 +8,8 @@ export default [
   {
     ignores: ['.nuxt/', 'node_modules/'],
   },
-  // TypeScript support - lightweight to avoid parser project lookup issues in CI/preview
-  ...tseslint.configs.recommendedTypeChecked,
+  // TypeScript support - use base recommended (non-type-checked) to avoid project tsconfig resolution in CI/preview
+  ...tseslint.configs.recommended,
   {
     files: ['**/*.{ts,tsx,vue}'],
     languageOptions: {
@@ -18,7 +18,7 @@ export default [
         ecmaVersion: 2022,
         sourceType: 'module',
         // Do not require a project tsconfig to avoid resolving .nuxt tsconfigs during preview
-        // This keeps lint from blocking preview builds in constrained environments.
+        project: false
       },
       globals: {
         ...globals.node,

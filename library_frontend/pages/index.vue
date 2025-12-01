@@ -5,7 +5,15 @@
       <p style="margin:0; color:#4b5563;">Browse the collection, search by title or author, and filter by tag.</p>
     </header>
 
+    <div v-if="storeError" class="alert" role="alert">
+      The books store failed to initialize. Showing a minimal page.
+      <div style="margin-top:.5rem; font-size:.9rem; color:#6b7280;">
+        Please reload the page. If this persists, check /health and /api/health.
+      </div>
+    </div>
+
     <BookListToolbar
+      v-if="!storeError"
       :search="q"
       :tag="tag"
       :tags="allTags"
@@ -15,12 +23,20 @@
       style="margin-bottom: .9rem;"
     />
 
-    <div v-if="!filtered.length" class="alert" role="status" aria-live="polite">
+    <div v-if="!storeError && !filtered.length" class="alert" role="status" aria-live="polite">
       No books found. Try adjusting your search or filters.
     </div>
 
-    <div class="grid cols-4">
+    <div v-if="!storeError" class="grid cols-4">
       <BookCard v-for="b in filtered" :key="b.id" :book="b" />
+    </div>
+
+    <div v-else style="margin-top:1rem;">
+      <p>Ocean Library is running. Try the health checks:</p>
+      <ul>
+        <li><a href="/health" target="_self" rel="noopener">/health</a></li>
+        <li><a href="/api/health" target="_self" rel="noopener">/api/health</a></li>
+      </ul>
     </div>
   </section>
 </template>
@@ -31,9 +47,31 @@ const { list, uniqueTags } = useBooks();
 
 const q = ref('');
 const tag = ref('');
+const storeError = ref(false);
 
-const books = computed(() => list());
-const allTags = computed(() => uniqueTags());
+const safeList = () => {
+  try {
+    return list();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Books store list() failed', e);
+    storeError.value = true;
+    return [];
+  }
+};
+const safeTags = () => {
+  try {
+    return uniqueTags();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Books store uniqueTags() failed', e);
+    storeError.value = true;
+    return [];
+  }
+};
+
+const books = computed(() => safeList());
+const allTags = computed(() => safeTags());
 
 const filtered = computed(() => {
   const needle = q.value.trim().toLowerCase();

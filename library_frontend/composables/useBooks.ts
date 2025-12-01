@@ -181,8 +181,13 @@ export function useBooks() {
 
 function cryptoRandomId(): string {
   // Safely access Web Crypto in both browser and Node (Nuxt SSR) without throwing
-  const g: any = typeof globalThis !== 'undefined' ? globalThis : undefined;
-  const c: any = g?.crypto;
+  let c: any = undefined;
+  try {
+    const g: any = typeof globalThis !== 'undefined' ? globalThis : undefined;
+    c = g?.crypto;
+  } catch {
+    c = undefined;
+  }
 
   // Prefer randomUUID when available
   if (c && typeof c.randomUUID === 'function') {

@@ -13,6 +13,7 @@
     <AppHeader />
     <main class="container" style="padding-top: 1rem; padding-bottom: 2rem;">
       <!-- Error boundary to show a friendly message instead of blank -->
+      <!-- NuxtPage renders the current route; kept minimal to avoid blocking assets -->
       <NuxtErrorBoundary>
         <NuxtPage />
         <template #error="{ error }">

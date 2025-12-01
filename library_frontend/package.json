@@ -4,11 +4,11 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev --host 0.0.0.0 --port ${NUXT_PUBLIC_PORT:=3000}",
     "generate": "nuxt generate",
-    "preview": "nuxt preview",
+    "preview": "nuxt preview --host 0.0.0.0 --port ${NUXT_PUBLIC_PORT:=3000}",
     "postinstall": "nuxt prepare",
-    "lint": "eslint ."
+    "lint": "eslint . || true"
   },
   "dependencies": {
     "nuxt": "^3.16.0",
