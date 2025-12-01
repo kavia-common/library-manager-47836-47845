@@ -99,14 +99,38 @@ export default defineNuxtConfig({
   },
   vite: {
     // Respect NUXT_PUBLIC_PORT if provided; fallback to 3000
-    // Host/allowedHosts are also defined in vite.config.ts for compatibility with preview infra.
+    // Mirror allowedHosts here to avoid merge/override issues in Nuxt.
     server: {
       host: true, // listen on 0.0.0.0
-      port: Number(process.env.NUXT_PUBLIC_PORT || 3000)
+      port: Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000),
+      strictPort: true,
+      // Keep the hardcoded preview host and allow env to augment via ALLOWED_HOSTS
+      allowedHosts: [
+        'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
+        ...String(process.env.ALLOWED_HOSTS || '')
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+      ],
+      hmr: (() => {
+        const portEnv =
+          process.env.HMR_CLIENT_PORT ||
+          process.env.NUXT_PUBLIC_PORT ||
+          process.env.PORT;
+        return portEnv ? { clientPort: Number(portEnv) } : undefined;
+      })(),
     },
     preview: {
       host: true,
-      port: Number(process.env.NUXT_PUBLIC_PORT || 3000)
+      port: Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000),
+      strictPort: true,
+      allowedHosts: [
+        'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
+        ...String(process.env.ALLOWED_HOSTS || '')
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+      ],
     },
     build: {
       // Avoid type-check blocking during build; Vite handles transpile only

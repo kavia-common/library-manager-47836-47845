@@ -81,6 +81,29 @@ npm run preview
 ```
 Preview/Dev serves on `0.0.0.0:3000` to support remote previews.
 
+### Allowed hosts / Preview proxies
+If you see "Blocked request. This host is not allowed." ensure the preview hostname is allowed in Vite. This project:
+
+- Hardcodes the preview host: `vscode-internal-34023-qa.qa01.cloud.kavia.ai`
+- Reads optional `ALLOWED_HOSTS` env (comma-separated) to augment the allowlist.
+- Enables `server.host = true` and `strictPort = true` for consistent binding.
+- Sets HMR client port from `HMR_CLIENT_PORT` or `NUXT_PUBLIC_PORT` when present.
+
+Examples:
+```bash
+# add extra host(s) if needed
+ALLOWED_HOSTS="my-proxy.example.com,another.host" npm run dev
+
+# set explicit HMR client port (useful behind TLS proxies)
+HMR_CLIENT_PORT=3000 npm run dev
+```
+
+Verification checklist:
+- Visit `/health` -> should return `OK`
+- Visit `/api/health` -> should return `{ status: 'ok', timestamp }`
+- Top banner should show "SSR OK · Hydrated" after client mounts
+- No "Blocked request" message in the browser console/network panel
+
 ## Notes
 - No backend calls are made; any provided URLs are ignored unless you wire them in future.
 - Keep dependencies minimal and avoid modifying preview/startup tooling.
