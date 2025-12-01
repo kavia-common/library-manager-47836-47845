@@ -99,13 +99,13 @@ export default defineNuxtConfig({
   },
   vite: {
     // Respect NUXT_PUBLIC_PORT if provided; fallback to 3000
+    // Host/allowedHosts are also defined in vite.config.ts for compatibility with preview infra.
     server: {
-      host: '0.0.0.0',
-      allowedHosts: true,
+      host: true, // listen on 0.0.0.0
       port: Number(process.env.NUXT_PUBLIC_PORT || 3000)
     },
     preview: {
-      host: '0.0.0.0',
+      host: true,
       port: Number(process.env.NUXT_PUBLIC_PORT || 3000)
     },
     build: {
