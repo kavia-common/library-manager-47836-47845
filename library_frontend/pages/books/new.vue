@@ -1,6 +1,6 @@
 <template>
-  <section>
-    <header style="margin-bottom:.5rem;">
+  <section class="section">
+    <header class="card" style="padding:1rem; margin-bottom:.9rem;">
       <h1 style="margin:0 0 .25rem 0;">Add Book</h1>
       <p style="margin:0; color:#4b5563;">Enter details for the new book.</p>
     </header>

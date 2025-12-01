@@ -1,15 +1,15 @@
 <template>
-  <section>
-    <header style="margin-bottom: .75rem;">
+  <section class="section">
+    <header class="card" style="padding:1rem; margin-bottom: .9rem;">
       <h1 style="margin:0 0 .25rem 0;">Books</h1>
       <p style="margin:0; color:#4b5563;">Browse the collection, search by title or author, and filter by tag.</p>
       <p style="margin:.4rem 0 0 0; color:#6b7280; font-size:.9rem;">This page always renders server-side for an immediate first paint.</p>
     </header>
 
     <!-- Always SSR-rendered status row -->
-    <div class="card" style="padding:.5rem .75rem; margin-bottom:.75rem; display:flex; justify-content:space-between; align-items:center;">
+    <div class="card" style="padding:.6rem .9rem; margin-bottom:.9rem; display:flex; justify-content:space-between; align-items:center;">
       <span style="color:#1f2937;">SSR OK</span>
-      <span v-if="hydrated" style="color:#2563EB;">Hydrated</span>
+      <span v-if="hydrated" style="color:var(--color-primary);">Hydrated</span>
       <span v-else style="color:#6b7280;">Awaiting hydration…</span>
     </div>
 
@@ -22,16 +22,18 @@
     </div>
 
     <!-- Toolbar is visible on SSR with empty values to avoid blocking -->
-    <BookListToolbar
-      v-if="!storeError"
-      :search="q"
-      :tag="tag"
-      :tags="allTags"
-      @update:search="val => q = val"
-      @update:tag="val => tag = val"
-      @clear="clearFilters"
-      style="margin-bottom: .9rem;"
-    />
+    <Transition name="fade">
+      <BookListToolbar
+        v-if="!storeError"
+        :search="q"
+        :tag="tag"
+        :tags="allTags"
+        @update:search="val => q = val"
+        @update:tag="val => tag = val"
+        @clear="clearFilters"
+        style="margin-bottom: .9rem;"
+      />
+    </Transition>
 
     <!-- Skeleton for first paint (SSR) -->
     <div v-if="!hydrated && !storeError" class="grid cols-4" aria-hidden="true">
@@ -39,11 +41,13 @@
     </div>
 
     <!-- Real content -->
-    <div v-if="!storeError" class="grid cols-4">
-      <BookCard v-for="b in filtered" :key="b.id" :book="b" />
-    </div>
+    <Transition name="fade">
+      <div v-if="!storeError" class="grid cols-4">
+        <BookCard v-for="b in filtered" :key="b.id" :book="b" />
+      </div>
+    </Transition>
 
-    <div v-if="!storeError && hydrated && !filtered.length" class="alert" role="status" aria-live="polite" style="margin-top:.75rem;">
+    <div v-if="!storeError && hydrated && !filtered.length" class="alert" role="status" aria-live="polite" style="margin-top:.9rem;">
       No books found. Try adjusting your search or filters.
     </div>
 

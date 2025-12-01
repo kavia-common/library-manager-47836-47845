@@ -1,6 +1,10 @@
 <template>
-  <article class="card" style="overflow: hidden;">
-    <NuxtLink :to="`/books/${book.id}`" class="card-link" :aria-label="`View details for ${book.title}`">
+  <article class="card scale-soft" style="overflow: hidden;">
+    <NuxtLink
+      :to="`/books/${book.id}`"
+      class="card-link focus-ring"
+      :aria-label="`View details for ${book.title}`"
+    >
       <div class="cover-wrap">
         <img
           :src="book.coverUrl || placeholder"
@@ -25,7 +29,7 @@
 
 <script setup lang="ts">
 import type { Book } from '~/composables/useBooks';
-const props = defineProps<{ book: Book }>();
+defineProps<{ book: Book }>();
 
 const { experiments } = useFeatureFlags();
 const showRating = computed(() => experiments?.bookRating === true);
@@ -45,43 +49,52 @@ function onImgError(e: Event) {
   display: grid;
   grid-template-rows: 220px 1fr;
   color: inherit;
+  border-radius: var(--radius-lg);
 }
+
 .cover-wrap {
   background: linear-gradient(135deg, rgba(59,130,246,.08), rgba(249,250,251,1));
 }
+
 .cover {
   display: block;
   width: 100%;
   height: 220px;
   object-fit: cover;
 }
+
 .content {
-  padding: .9rem;
+  padding: 1rem;
 }
+
 .title {
-  margin: 0 0 .25rem 0;
-  font-size: 1.05rem;
+  margin: 0 0 .3rem 0;
+  font-size: 1.06rem;
+  color: #0f172a;
 }
+
 .meta {
-  margin: 0 0 .5rem 0;
+  margin: 0 0 .55rem 0;
   color: #4b5563;
 }
+
 .tags {
   display: flex;
   flex-wrap: wrap;
-  gap: .35rem;
+  gap: .4rem;
   margin-top: .25rem;
 }
+
 .rating {
-  margin-top: .5rem;
-  color: #f59e0b;
+  margin-top: .55rem;
+  color: var(--color-secondary);
 }
+
 .star {
   font-size: 1rem;
   opacity: .35;
   transition: opacity var(--transition-fast);
 }
-.star.filled {
-  opacity: 1;
-}
+
+.star.filled { opacity: 1; }
 </style>

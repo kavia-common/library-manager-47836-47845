@@ -3,9 +3,11 @@
   <div>
     <NuxtRouteAnnouncer />
     <AppHeader />
-    <main class="container" style="padding-top: 1rem; padding-bottom: 2rem;">
+    <main class="container section">
       <NuxtErrorBoundary>
-        <NuxtPage />
+        <Transition name="fade" mode="out-in">
+          <NuxtPage />
+        </Transition>
         <template #error="{ error }">
           <div class="alert" role="alert">
             A rendering error occurred. Please refresh.

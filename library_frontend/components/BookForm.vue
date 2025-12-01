@@ -1,53 +1,64 @@
 <template>
-  <form class="card" style="padding: 1rem; display:grid; gap:.75rem; max-width: 820px;" @submit.prevent="onSubmit">
-    <div class="grid" style="grid-template-columns: 1fr 1fr; gap:.75rem;">
+  <Transition name="slide-up">
+    <form
+      class="card"
+      style="padding: 1.1rem; display:grid; gap:.9rem; max-width: 820px;"
+      @submit.prevent="onSubmit"
+    >
+      <div class="grid" style="grid-template-columns: 1fr 1fr; gap:.9rem;">
+        <div>
+          <label for="title" class="label">Title <span aria-hidden="true" style="color:var(--color-error)">*</span></label>
+          <input id="title" v-model.trim="form.title" class="input" type="text" required aria-required="true" />
+          <div class="helper">Enter the full book title.</div>
+        </div>
+        <div>
+          <label for="author" class="label">Author <span aria-hidden="true" style="color:var(--color-error)">*</span></label>
+          <input id="author" v-model.trim="form.author" class="input" type="text" required aria-required="true" />
+          <div class="helper">Primary author(s) of this book.</div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: 1fr 1fr; gap:.9rem;">
+        <div>
+          <label for="year" class="label">Year</label>
+          <input id="year" v-model.number="form.year" class="input" type="number" min="0" placeholder="e.g., 2020" />
+          <div class="helper">Publication year (optional).</div>
+        </div>
+        <div v-if="showRating">
+          <label for="rating" class="label">Rating</label>
+          <select id="rating" v-model.number="form.rating" class="select" aria-label="Select rating from 1 to 5">
+            <option :value="undefined">No rating</option>
+            <option v-for="n in 5" :key="n" :value="n">{{ n }} ★</option>
+          </select>
+          <div class="helper">Optional 1–5 star rating.</div>
+        </div>
+      </div>
+
       <div>
-        <label for="title">Title<span aria-hidden="true" style="color:var(--color-error)">*</span></label>
-        <input id="title" v-model.trim="form.title" class="input" type="text" required aria-required="true" />
+        <label for="tags" class="label">Genre/Tags</label>
+        <input id="tags" v-model.trim="tagsText" class="input" type="text" placeholder="e.g., Software, Programming" />
+        <div class="helper">Comma separated, used for filtering.</div>
       </div>
+
       <div>
-        <label for="author">Author<span aria-hidden="true" style="color:var(--color-error)">*</span></label>
-        <input id="author" v-model.trim="form.author" class="input" type="text" required aria-required="true" />
+        <label for="coverUrl" class="label">Cover URL</label>
+        <input id="coverUrl" v-model.trim="form.coverUrl" class="input" type="url" placeholder="https://..." />
       </div>
-    </div>
 
-    <div class="grid" style="grid-template-columns: 1fr 1fr; gap:.75rem;">
       <div>
-        <label for="year">Year</label>
-        <input id="year" v-model.number="form.year" class="input" type="number" min="0" placeholder="e.g., 2020" />
+        <label for="description" class="label">Description</label>
+        <textarea id="description" v-model.trim="form.description" class="textarea" rows="6"></textarea>
       </div>
-      <div v-if="showRating">
-        <label for="rating">Rating</label>
-        <select id="rating" v-model.number="form.rating" class="select" aria-label="Select rating from 1 to 5">
-          <option :value="undefined">No rating</option>
-          <option v-for="n in 5" :key="n" :value="n">{{ n }} ★</option>
-        </select>
+
+      <div v-if="error" class="alert" role="alert">{{ error }}</div>
+
+      <div style="display:flex; gap:.6rem; justify-content:flex-end;">
+        <NuxtLink v-if="bookId" :to="`/books/${bookId}`" class="btn">Cancel</NuxtLink>
+        <NuxtLink v-else to="/" class="btn">Cancel</NuxtLink>
+        <button class="btn btn-primary" type="submit">{{ bookId ? 'Save Changes' : 'Add Book' }}</button>
       </div>
-    </div>
-
-    <div>
-      <label for="tags">Genre/Tags (comma separated)</label>
-      <input id="tags" v-model.trim="tagsText" class="input" type="text" placeholder="e.g., Software, Programming" />
-    </div>
-
-    <div>
-      <label for="coverUrl">Cover URL</label>
-      <input id="coverUrl" v-model.trim="form.coverUrl" class="input" type="url" placeholder="https://..." />
-    </div>
-
-    <div>
-      <label for="description">Description</label>
-      <textarea id="description" v-model.trim="form.description" class="textarea" rows="6"></textarea>
-    </div>
-
-    <div v-if="error" class="alert" role="alert">{{ error }}</div>
-
-    <div style="display:flex; gap:.5rem; justify-content:flex-end;">
-      <NuxtLink v-if="bookId" :to="`/books/${bookId}`" class="btn">Cancel</NuxtLink>
-      <NuxtLink v-else to="/" class="btn">Cancel</NuxtLink>
-      <button class="btn btn-primary" type="submit">{{ bookId ? 'Save Changes' : 'Add Book' }}</button>
-    </div>
-  </form>
+    </form>
+  </Transition>
 </template>
 
 <script setup lang="ts">

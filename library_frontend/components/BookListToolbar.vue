@@ -1,5 +1,5 @@
 <template>
-  <div class="card" style="padding: .75rem; display: grid; gap: .75rem; grid-template-columns: 1fr 220px;">
+  <div class="card bg-strip" style="padding: .9rem; display: grid; gap: .75rem; grid-template-columns: 1fr 260px;">
     <label class="sr-only" for="search">Search</label>
     <input
       id="search"
@@ -11,7 +11,7 @@
       aria-label="Search books by title or author"
     />
 
-    <div style="display:flex; gap:.5rem; align-items:center;">
+    <div style="display:flex; gap:.6rem; align-items:center; justify-content:flex-end;">
       <label for="tag" class="sr-only">Filter by tag</label>
       <select
         id="tag"
@@ -49,7 +49,7 @@ defineEmits<{
   overflow: hidden; clip: rect(0,0,0,0);
   white-space: nowrap; border: 0;
 }
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   div.card {
     grid-template-columns: 1fr;
   }
