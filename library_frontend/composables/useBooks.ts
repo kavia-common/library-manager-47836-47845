@@ -180,9 +180,30 @@ export function useBooks() {
 }
 
 function cryptoRandomId(): string {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    // @ts-ignore
-    return crypto.randomUUID();
+  // Safely access Web Crypto in both browser and Node (Nuxt SSR) without throwing
+  const g: any = (typeof globalThis !== 'undefined') ? globalThis : undefined;
+  const c: any = g?.crypto;
+
+  // Prefer randomUUID when available
+  if (c && typeof c.randomUUID === 'function') {
+    try {
+      return c.randomUUID();
+    } catch {
+      // fall through to other strategies
+    }
   }
+
+  // Try getRandomValues if available
+  if (c && typeof c.getRandomValues === 'function') {
+    try {
+      const arr = new Uint32Array(4);
+      c.getRandomValues(arr);
+      return Array.from(arr).map(n => n.toString(36)).join('').slice(0, 24);
+    } catch {
+      // fall through
+    }
+  }
+
+  // Fallback: use Math.random and time
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }

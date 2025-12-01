@@ -18,5 +18,5 @@ useHead({
 </script>
 
 <style>
-@import url('/assets/styles/theme.css');
+/* Global theme CSS is loaded via nuxt.config.ts css array */
 </style>

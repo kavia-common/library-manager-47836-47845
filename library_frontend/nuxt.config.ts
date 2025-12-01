@@ -2,11 +2,17 @@
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
+  css: [
+    '~/assets/styles/theme.css',
+  ],
   app: {
     head: {
       htmlAttrs: { lang: 'en' },
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      ],
       link: [
-        // Use a valid, minimal inline SVG favicon (avoid malformed viewBox like "100%")
         {
           rel: 'icon',
           type: 'image/svg+xml',
