@@ -31,6 +31,13 @@ npm run dev
 
 Visit: http://localhost:3000
 
+## Health / Debug
+- Server health: `GET /health` returns `OK`
+- API health: `GET /api/health` returns `{ status: 'ok', timestamp }`
+- The top blue banner in the UI shows "SSR OK" to confirm server-side render; it toggles to "Hydrated" when the client has mounted.
+
+If you only see the Nuxt logo, check browser console for hydration errors and visit `/health` to ensure the server is reachable.
+
 ## Routes
 - `/` — Books List (search and filter)
 - `/books/:id` — Book Details
@@ -72,6 +79,7 @@ Theme CSS is defined in `assets/styles/theme.css` and loaded globally. If you wa
 npm run build
 npm run preview
 ```
+Preview/Dev serves on `0.0.0.0:3000` to support remote previews.
 
 ## Notes
 - No backend calls are made; any provided URLs are ignored unless you wire them in future.

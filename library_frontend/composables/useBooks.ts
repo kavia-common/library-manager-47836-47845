@@ -181,7 +181,7 @@ export function useBooks() {
 
 function cryptoRandomId(): string {
   // Safely access Web Crypto in both browser and Node (Nuxt SSR) without throwing
-  const g: any = (typeof globalThis !== 'undefined') ? globalThis : undefined;
+  const g: any = typeof globalThis !== 'undefined' ? globalThis : undefined;
   const c: any = g?.crypto;
 
   // Prefer randomUUID when available
@@ -198,12 +198,12 @@ function cryptoRandomId(): string {
     try {
       const arr = new Uint32Array(4);
       c.getRandomValues(arr);
-      return Array.from(arr).map(n => n.toString(36)).join('').slice(0, 24);
+      return Array.from(arr).map((n) => n.toString(36)).join('').slice(0, 24);
     } catch {
       // fall through
     }
   }
 
-  // Fallback: use Math.random and time
+  // Fallback: use Math.random and time (works universally; not cryptographically secure)
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }

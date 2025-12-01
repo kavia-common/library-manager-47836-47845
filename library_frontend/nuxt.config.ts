@@ -1,16 +1,14 @@
 /* https://nuxt.com/docs/api/configuration/nuxt-config */
 export default defineNuxtConfig({
-  compatibilityDate: "2024-11-01",
+  compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
-  css: [
-    '~/assets/styles/theme.css',
-  ],
+  css: ['~/assets/styles/theme.css'],
   app: {
     head: {
       htmlAttrs: { lang: 'en' },
       meta: [
         { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' }
       ],
       link: [
         {
@@ -21,8 +19,8 @@ export default defineNuxtConfig({
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
             '<circle cx="50" cy="50" r="48" fill="#2563EB"/></svg>'
         }
-      ],
-    },
+      ]
+    }
   },
   runtimeConfig: {
     public: {
@@ -38,23 +36,32 @@ export default defineNuxtConfig({
       TRUST_PROXY: process.env.NUXT_PUBLIC_TRUST_PROXY || '',
       LOG_LEVEL: process.env.NUXT_PUBLIC_LOG_LEVEL || '',
       HEALTHCHECK_PATH: process.env.NUXT_PUBLIC_HEALTHCHECK_PATH || '',
-      EXPERIMENTS_ENABLED: process.env.NUXT_PUBLIC_EXPERIMENTS_ENABLED || '',
+      EXPERIMENTS_ENABLED: process.env.NUXT_PUBLIC_EXPERIMENTS_ENABLED || ''
     }
   },
   nitro: {
+    // Ensure health endpoints are public and cached minimally
     routeRules: {
-      "/**": {
+      '/health': { cache: false },
+      '/api/health': { cache: false },
+      '/**': {
         headers: {
-          "Access-Control-Allow-Origin": "*",
-        },
-      },
+          'Access-Control-Allow-Origin': '*'
+        }
+      }
     },
+    preset: process.env.NITRO_PRESET || undefined
   },
   vite: {
     server: {
       host: '0.0.0.0',
+      // allow all hosts (useful in preview environments)
       allowedHosts: true,
-      port: 3000,
+      port: 3000
     },
-  },
+    preview: {
+      host: '0.0.0.0',
+      port: 3000
+    }
+  }
 });

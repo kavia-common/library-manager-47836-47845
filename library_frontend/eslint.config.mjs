@@ -1,4 +1,4 @@
-// eslint.config.mjs
+/* eslint.config.mjs */
 import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -6,34 +6,32 @@ import tseslint from 'typescript-eslint';
 export default [
   js.configs.recommended,
   {
-    ignores: [
-      ".nuxt/",
-      "node_modules/",
-    ],
+    ignores: ['.nuxt/', 'node_modules/'],
   },
-  // TypeScript support
-  ...tseslint.configs.recommended,
-
+  // TypeScript support - lightweight to avoid parser project lookup issues in CI/preview
+  ...tseslint.configs.recommendedTypeChecked,
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/*.{ts,tsx,vue}'],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        project: './tsconfig.json',
         ecmaVersion: 2022,
         sourceType: 'module',
+        // Do not require a project tsconfig to avoid resolving .nuxt tsconfigs during preview
+        // This keeps lint from blocking preview builds in constrained environments.
+      },
+      globals: {
+        ...globals.node,
+        ...globals.browser,
       },
     },
     rules: {
-      // Example custom rules for TS
       '@typescript-eslint/no-unused-vars': ['warn'],
       '@typescript-eslint/explicit-function-return-type': 'off',
     },
   },
-
-  // JS files config (same as before)
   {
-    files: ['**/*.js', '**/*.jsx'],
+    files: ['**/*.{js,jsx}'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -45,7 +43,7 @@ export default [
     rules: {
       'no-unused-vars': 'warn',
       'no-console': 'off',
-      'eqeqeq': ['error', 'always'],
+      eqeqeq: ['error', 'always'],
     },
   },
 ];
