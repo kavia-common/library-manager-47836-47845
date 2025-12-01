@@ -15,7 +15,8 @@ function parseCsv(envVar?: string): string[] {
 // Constants and env
 const hardcodedHost = 'vscode-internal-34023-qa.qa01.cloud.kavia.ai';
 const envAllowedHosts = parseCsv(process.env.ALLOWED_HOSTS);
-const allowedHosts = Array.from(new Set([hardcodedHost, ...envAllowedHosts]));
+const wildcardHosts = ['*.cloud.kavia.ai'];
+const allowedHosts = Array.from(new Set([hardcodedHost, ...wildcardHosts, ...envAllowedHosts]));
 const port = Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000);
 
 // Prefer explicit HMR client port when behind TLS proxies; fall back to same as port
@@ -32,10 +33,24 @@ export default defineConfig({
     port,
     strictPort: true,    // fail if the port is taken to avoid silent port changes
     allowedHosts,
-    hmr: {
-      // Use env-provided clientPort when present (helpful behind proxies)
-      ...(hmrClientPort ? { clientPort: hmrClientPort } : {}),
-    },
+    origin: (() => {
+      const envOrigin =
+        process.env.NUXT_PUBLIC_FRONTEND_URL ||
+        process.env.FRONTEND_URL ||
+        '';
+      return envOrigin || `https://${hardcodedHost}:${port}`;
+    })(),
+    hmr: (() => {
+      const host =
+        process.env.HMR_HOST ||
+        process.env.PREVIEW_HOST ||
+        hardcodedHost;
+      return {
+        ...(hmrClientPort ? { clientPort: hmrClientPort } : {}),
+        host,
+        protocol: 'wss'
+      };
+    })(),
   },
   preview: {
     host: true,

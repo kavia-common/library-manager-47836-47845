@@ -85,9 +85,11 @@ Preview/Dev serves on `0.0.0.0:3000` to support remote previews.
 If you see "Blocked request. This host is not allowed." ensure the preview hostname is allowed in Vite. This project:
 
 - Hardcodes the preview host: `vscode-internal-34023-qa.qa01.cloud.kavia.ai`
+- Allows wildcard domain: `*.cloud.kavia.ai`
 - Reads optional `ALLOWED_HOSTS` env (comma-separated) to augment the allowlist.
 - Enables `server.host = true` and `strictPort = true` for consistent binding.
 - Sets HMR client port from `HMR_CLIENT_PORT` or `NUXT_PUBLIC_PORT` when present.
+- Sets `server.origin` and HMR `host` to the external preview host when detected/configured.
 
 Examples:
 ```bash
@@ -96,6 +98,11 @@ ALLOWED_HOSTS="my-proxy.example.com,another.host" npm run dev
 
 # set explicit HMR client port (useful behind TLS proxies)
 HMR_CLIENT_PORT=3000 npm run dev
+
+# explicitly set external origin and HMR host when needed
+NUXT_PUBLIC_FRONTEND_URL="https://vscode-internal-34023-qa.qa01.cloud.kavia.ai:3000" \
+HMR_HOST="vscode-internal-34023-qa.qa01.cloud.kavia.ai" \
+npm run dev
 ```
 
 Verification checklist:

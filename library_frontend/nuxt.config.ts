@@ -105,19 +105,38 @@ export default defineNuxtConfig({
       port: Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000),
       strictPort: true,
       // Keep the hardcoded preview host and allow env to augment via ALLOWED_HOSTS
+      // Add wildcard pattern for common preview domains
       allowedHosts: [
         'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
+        '*.cloud.kavia.ai',
         ...String(process.env.ALLOWED_HOSTS || '')
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean),
       ],
+      // When served behind an HTTPS proxy, setting origin and hmr host improves WS connectivity
+      origin: (() => {
+        const envOrigin =
+          process.env.NUXT_PUBLIC_FRONTEND_URL ||
+          process.env.FRONTEND_URL ||
+          '';
+        // If explicit origin provided, use it; otherwise best-effort proxy hostname
+        return envOrigin || `https://vscode-internal-34023-qa.qa01.cloud.kavia.ai:${Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000)}`;
+      })(),
       hmr: (() => {
-        const portEnv =
+        const clientPort =
           process.env.HMR_CLIENT_PORT ||
           process.env.NUXT_PUBLIC_PORT ||
           process.env.PORT;
-        return portEnv ? { clientPort: Number(portEnv) } : undefined;
+        const host =
+          process.env.HMR_HOST ||
+          process.env.PREVIEW_HOST ||
+          'vscode-internal-34023-qa.qa01.cloud.kavia.ai';
+        return {
+          ...(clientPort ? { clientPort: Number(clientPort) } : {}),
+          host,
+          protocol: 'wss'
+        };
       })(),
     },
     preview: {
@@ -126,6 +145,7 @@ export default defineNuxtConfig({
       strictPort: true,
       allowedHosts: [
         'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
+        '*.cloud.kavia.ai',
         ...String(process.env.ALLOWED_HOSTS || '')
           .split(',')
           .map((s) => s.trim())
