@@ -11,10 +11,18 @@ type ApiBase = {
  */
 export function useApiBase(): ApiBase {
   const runtime = useRuntimeConfig();
+
+  // Helper to coerce empty strings to undefined for safer downstream checks
+  const clean = (val: unknown): string | undefined => {
+    if (typeof val !== 'string') return undefined;
+    const trimmed = val.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  };
+
   return {
-    apiBase: (runtime.public as any)?.API_BASE || process.env.NUXT_PUBLIC_API_BASE,
-    backendUrl: (runtime.public as any)?.BACKEND_URL || process.env.NUXT_PUBLIC_BACKEND_URL,
-    frontendUrl: (runtime.public as any)?.FRONTEND_URL || process.env.NUXT_PUBLIC_FRONTEND_URL,
-    wsUrl: (runtime.public as any)?.WS_URL || process.env.NUXT_PUBLIC_WS_URL,
+    apiBase: clean((runtime.public as any)?.API_BASE) ?? clean(process.env.NUXT_PUBLIC_API_BASE),
+    backendUrl: clean((runtime.public as any)?.BACKEND_URL) ?? clean(process.env.NUXT_PUBLIC_BACKEND_URL),
+    frontendUrl: clean((runtime.public as any)?.FRONTEND_URL) ?? clean(process.env.NUXT_PUBLIC_FRONTEND_URL),
+    wsUrl: clean((runtime.public as any)?.WS_URL) ?? clean(process.env.NUXT_PUBLIC_WS_URL),
   };
 }
