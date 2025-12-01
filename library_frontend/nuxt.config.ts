@@ -6,7 +6,15 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'en' },
       link: [
-        { rel: 'icon', type: 'image/svg+xml', href: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2248%22 fill=%22%232563EB%22/></svg>' }
+        // Use a valid, minimal inline SVG favicon (avoid malformed viewBox like "100%")
+        {
+          rel: 'icon',
+          type: 'image/svg+xml',
+          href:
+            'data:image/svg+xml;utf8,' +
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+            '<circle cx="50" cy="50" r="48" fill="#2563EB"/></svg>'
+        }
       ],
     },
   },
