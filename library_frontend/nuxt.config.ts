@@ -97,43 +97,51 @@ export default defineNuxtConfig({
     },
     preset: process.env.NITRO_PRESET || undefined
   },
+  // Important: Nuxt merges this vite block with external vite.config.ts.
+  // We keep values identical and comprehensive here to ensure merging yields an allowlist
+  // that includes our preview host(s) and HMR settings consistently.
   vite: {
-    // Respect NUXT_PUBLIC_PORT if provided; fallback to 3000.
-    // Mirror allowedHosts/HMR here to avoid merge/override issues when Nuxt merges external vite.config.ts.
     server: {
-      host: true, // listen on 0.0.0.0
+      host: true,
       port: Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000),
       strictPort: true,
-      // Keep the hardcoded preview host and allow env to augment via ALLOWED_HOSTS
-      // Add wildcard pattern for common preview domains
+      // Exact preview host from environment (screenshot) plus variants and wildcard:
+      // - vscode-internal-34023-qa.qa01.cloud.kavia.ai (exact)
+      // - *.cloud.kavia.ai (wildcard)
+      // - Additional optional env-provided hosts via ALLOWED_HOSTS
       allowedHosts: [
         'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
+        // include common preview subdomain patterns just in case proxies rewrite:
+        'vscode-internal-*.qa01.cloud.kavia.ai',
         '*.cloud.kavia.ai',
         ...String(process.env.ALLOWED_HOSTS || '')
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean),
       ],
-      // When served behind an HTTPS proxy, setting origin and hmr host improves WS connectivity
+      // Align origin with preview URL to fix asset and websocket URL construction
       origin: (() => {
+        const port = Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000);
         const envOrigin =
           process.env.NUXT_PUBLIC_FRONTEND_URL ||
           process.env.FRONTEND_URL ||
           '';
-        // If explicit origin provided, use it; otherwise best-effort proxy hostname
-        return envOrigin || `https://vscode-internal-34023-qa.qa01.cloud.kavia.ai:${Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000)}`;
+        return envOrigin || `https://vscode-internal-34023-qa.qa01.cloud.kavia.ai:${port}`;
       })(),
       hmr: (() => {
+        const port = Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000);
         const clientPort =
           process.env.HMR_CLIENT_PORT ||
           process.env.NUXT_PUBLIC_PORT ||
-          process.env.PORT;
+          process.env.PORT ||
+          String(port);
         const host =
           process.env.HMR_HOST ||
           process.env.PREVIEW_HOST ||
           'vscode-internal-34023-qa.qa01.cloud.kavia.ai';
+        // Use secure WS for preview proxy
         return {
-          ...(clientPort ? { clientPort: Number(clientPort) } : {}),
+          clientPort: Number(clientPort),
           host,
           protocol: 'wss'
         };
@@ -145,6 +153,7 @@ export default defineNuxtConfig({
       strictPort: true,
       allowedHosts: [
         'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
+        'vscode-internal-*.qa01.cloud.kavia.ai',
         '*.cloud.kavia.ai',
         ...String(process.env.ALLOWED_HOSTS || '')
           .split(',')
@@ -153,8 +162,6 @@ export default defineNuxtConfig({
       ],
     },
     build: {
-      // Avoid type-check blocking during build; Vite handles transpile only
-      // Type checks can be run separately with `npm run lint` if desired
       target: 'es2020'
     }
   },
