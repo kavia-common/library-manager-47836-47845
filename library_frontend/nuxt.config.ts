@@ -102,16 +102,13 @@ export default defineNuxtConfig({
   // that includes our preview host(s) and HMR settings consistently.
   vite: {
     server: {
+      // host=true binds to 0.0.0.0 so remote preview can connect
       host: true,
       port: Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000),
       strictPort: true,
-      // Exact preview host from environment (screenshot) plus variants and wildcard:
-      // - vscode-internal-34023-qa.qa01.cloud.kavia.ai (exact)
-      // - *.cloud.kavia.ai (wildcard)
-      // - Additional optional env-provided hosts via ALLOWED_HOSTS
+      // Allow exact and wildcard preview hosts. Add more via ALLOWED_HOSTS if needed.
       allowedHosts: [
         'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
-        // include common preview subdomain patterns just in case proxies rewrite:
         'vscode-internal-*.qa01.cloud.kavia.ai',
         '*.qa01.cloud.kavia.ai',
         '*.cloud.kavia.ai',
@@ -120,7 +117,7 @@ export default defineNuxtConfig({
           .map((s) => s.trim())
           .filter(Boolean),
       ],
-      // Align origin with preview URL to fix asset and websocket URL construction
+      // Ensure asset URLs and ws origin match the external preview origin
       origin: (() => {
         const port = Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000);
         const envOrigin =
@@ -140,7 +137,6 @@ export default defineNuxtConfig({
           process.env.HMR_HOST ||
           process.env.PREVIEW_HOST ||
           'vscode-internal-34023-qa.qa01.cloud.kavia.ai';
-        // Use secure WS for preview proxy
         return {
           clientPort: Number(clientPort),
           host,
@@ -149,12 +145,14 @@ export default defineNuxtConfig({
       })(),
     },
     preview: {
+      // preview.host=true binds to 0.0.0.0
       host: true,
       port: Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000),
       strictPort: true,
       allowedHosts: [
         'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
         'vscode-internal-*.qa01.cloud.kavia.ai',
+        '*.qa01.cloud.kavia.ai',
         '*.cloud.kavia.ai',
         ...String(process.env.ALLOWED_HOSTS || '')
           .split(',')

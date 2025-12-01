@@ -5,6 +5,7 @@ import { defineEventHandler } from 'h3';
  * Lightweight non-API health route.
  * Route: GET /health
  * Returns plain text 'OK'
+ * Used by platform health checks to verify the server is bound and responding.
  */
 export default defineEventHandler((event) => {
   try {
