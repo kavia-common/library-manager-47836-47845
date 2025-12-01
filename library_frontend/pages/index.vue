@@ -3,6 +3,7 @@
     <header style="margin-bottom: .75rem;">
       <h1 style="margin:0 0 .25rem 0;">Books</h1>
       <p style="margin:0; color:#4b5563;">Browse the collection, search by title or author, and filter by tag.</p>
+      <p style="margin:.4rem 0 0 0; color:#6b7280; font-size:.9rem;">This list renders immediately with server-side HTML for a fast first paint.</p>
     </header>
 
     <div v-if="storeError" class="alert" role="alert">

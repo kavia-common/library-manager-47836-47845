@@ -1,19 +1,9 @@
 <template>
   <div>
-    <!-- SSR-visible banner to confirm layout renders even if hydration fails -->
-    <div
-      role="status"
-      aria-live="polite"
-      style="background:#e0ecff;color:#1e3a8a;padding:.35rem .6rem;font-size:.85rem;text-align:center"
-    >
-      Ocean Library — SSR OK <span v-if="isHydrated">· Hydrated</span><span v-else>· Waiting for client…</span>
-    </div>
-
     <NuxtRouteAnnouncer />
     <AppHeader />
     <main class="container" style="padding-top: 1rem; padding-bottom: 2rem;">
       <!-- Error boundary to show a friendly message instead of blank -->
-      <!-- NuxtPage renders the current route; kept minimal to avoid blocking assets -->
       <NuxtErrorBoundary>
         <NuxtPage />
         <template #error="{ error }">
@@ -29,13 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-
-const isHydrated = ref(false);
-onMounted(() => {
-  // Mark hydration done on client; avoids using browser APIs during SSR.
-  isHydrated.value = true;
-});
+import { } from 'vue';
 
 useHead({
   titleTemplate: (title) => (title ? `${title} · Ocean Library` : 'Ocean Library'),
