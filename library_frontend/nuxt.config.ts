@@ -33,7 +33,6 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     // Allow proxy trust if running behind a preview proxy
-    // Trust proxy via env; default true to be safe in preview
     nitro: {
       routeRules: {}
     },
@@ -54,8 +53,6 @@ export default defineNuxtConfig({
     }
   },
   nitro: {
-    // Listen on 0.0.0.0 and honor NUXT_PUBLIC_PORT (defaults to 3000)
-    // At runtime, Nuxt/Nitro respect NITRO_PORT/PORT envs; we set dev/preview host/port in vite below.
     // Expose health endpoints and basic CORS
     routeRules: {
       '/health': { cache: false },
@@ -66,19 +63,14 @@ export default defineNuxtConfig({
         }
       }
     },
-    // Trust upstream proxy by default in preview envs
     experimental: {
       openAPI: false
     },
-    // Hook minimal logging for SSR safety diagnostics
     hooks: {
-      'request': (event) => {
+      request: (event) => {
         try {
           const url = event.node?.req?.url || '';
-          if (url === '/health' || url === '/api/health') {
-            // keep logs minimal for health checks
-            return;
-          }
+          if (url === '/health' || url === '/api/health') return;
           // eslint-disable-next-line no-console
           console.log('[nitro] request', { url });
         } catch {
@@ -97,34 +89,32 @@ export default defineNuxtConfig({
     },
     preset: process.env.NITRO_PRESET || undefined
   },
-  // Important: Nuxt merges this vite block with external vite.config.ts.
-  // We keep values identical and comprehensive here to ensure merging yields an allowlist
-  // that includes our preview host(s) and HMR settings consistently.
   vite: {
     server: {
-      // host=true binds to 0.0.0.0 so remote preview can connect
-      host: true,
+      host: true, // binds to 0.0.0.0
       port: Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000),
       strictPort: true,
-      // Allow exact and wildcard preview hosts. Add more via ALLOWED_HOSTS if needed.
-      allowedHosts: [
-        'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
-        'vscode-internal-*.qa01.cloud.kavia.ai',
-        '*.qa01.cloud.kavia.ai',
-        '*.cloud.kavia.ai',
-        ...String(process.env.ALLOWED_HOSTS || '')
+      cors: true,
+      allowedHosts: (() => {
+        const base = [
+          'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
+          'vscode-internal-*.qa01.cloud.kavia.ai',
+          '*.qa01.cloud.kavia.ai',
+          '*.cloud.kavia.ai',
+        ];
+        const extra = String(process.env.ALLOWED_HOSTS || '')
           .split(',')
           .map((s) => s.trim())
-          .filter(Boolean),
-      ],
-      // Ensure asset URLs and ws origin match the external preview origin
+          .filter(Boolean);
+        return Array.from(new Set([...base, ...extra]));
+      })(),
+      // Safer origin: use FRONTEND_URL if provided, otherwise avoid forcing origin
       origin: (() => {
-        const port = Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000);
         const envOrigin =
           process.env.NUXT_PUBLIC_FRONTEND_URL ||
           process.env.FRONTEND_URL ||
           '';
-        return envOrigin || `https://vscode-internal-34023-qa.qa01.cloud.kavia.ai:${port}`;
+        return envOrigin || undefined;
       })(),
       hmr: (() => {
         const port = Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000);
@@ -136,41 +126,51 @@ export default defineNuxtConfig({
         const host =
           process.env.HMR_HOST ||
           process.env.PREVIEW_HOST ||
-          'vscode-internal-34023-qa.qa01.cloud.kavia.ai';
-        return {
+          undefined;
+        // Choose protocol only when we have an explicit external origin and it's https
+        const externalOrigin =
+          process.env.NUXT_PUBLIC_FRONTEND_URL ||
+          process.env.FRONTEND_URL ||
+          '';
+        const isHttps = externalOrigin.startsWith('https://');
+        const hmrConfig: Record<string, any> = {
           clientPort: Number(clientPort),
-          host,
-          protocol: 'wss'
         };
+        if (host) hmrConfig.host = host;
+        if (isHttps) {
+          // Only force wss when truly behind https origin
+          hmrConfig.protocol = 'wss';
+        }
+        return hmrConfig;
       })(),
     },
     preview: {
-      // preview.host=true binds to 0.0.0.0
       host: true,
       port: Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000),
       strictPort: true,
-      allowedHosts: [
-        'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
-        'vscode-internal-*.qa01.cloud.kavia.ai',
-        '*.qa01.cloud.kavia.ai',
-        '*.cloud.kavia.ai',
-        ...String(process.env.ALLOWED_HOSTS || '')
+      allowedHosts: (() => {
+        const base = [
+          'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
+          'vscode-internal-*.qa01.cloud.kavia.ai',
+          '*.qa01.cloud.kavia.ai',
+          '*.cloud.kavia.ai',
+        ];
+        const extra = String(process.env.ALLOWED_HOSTS || '')
           .split(',')
           .map((s) => s.trim())
-          .filter(Boolean),
-      ],
+          .filter(Boolean);
+        return Array.from(new Set([...base, ...extra]));
+      })(),
     },
     build: {
       target: 'es2020'
     }
   },
-  // Reduce risk of preview blocking on type/lint by disabling type-check during build
   typescript: {
     typeCheck: false,
     strict: false
   },
   eslint: {
-    // When using @nuxt/eslint-module (not installed here), we would disable during build.
-    // Keeping note for clarity.
+    // When using @nuxt/eslint-module, we would disable during build.
   }
 });
