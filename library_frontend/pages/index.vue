@@ -3,9 +3,17 @@
     <header style="margin-bottom: .75rem;">
       <h1 style="margin:0 0 .25rem 0;">Books</h1>
       <p style="margin:0; color:#4b5563;">Browse the collection, search by title or author, and filter by tag.</p>
-      <p style="margin:.4rem 0 0 0; color:#6b7280; font-size:.9rem;">This list renders immediately with server-side HTML for a fast first paint.</p>
+      <p style="margin:.4rem 0 0 0; color:#6b7280; font-size:.9rem;">This page always renders server-side for an immediate first paint.</p>
     </header>
 
+    <!-- Always SSR-rendered status row -->
+    <div class="card" style="padding:.5rem .75rem; margin-bottom:.75rem; display:flex; justify-content:space-between; align-items:center;">
+      <span style="color:#1f2937;">SSR OK</span>
+      <span v-if="hydrated" style="color:#2563EB;">Hydrated</span>
+      <span v-else style="color:#6b7280;">Awaiting hydration…</span>
+    </div>
+
+    <!-- Error alert if store fails -->
     <div v-if="storeError" class="alert" role="alert">
       The books store failed to initialize. Showing a minimal page.
       <div style="margin-top:.5rem; font-size:.9rem; color:#6b7280;">
@@ -13,6 +21,7 @@
       </div>
     </div>
 
+    <!-- Toolbar is visible on SSR with empty values to avoid blocking -->
     <BookListToolbar
       v-if="!storeError"
       :search="q"
@@ -24,15 +33,21 @@
       style="margin-bottom: .9rem;"
     />
 
-    <div v-if="!storeError && !filtered.length" class="alert" role="status" aria-live="polite">
-      No books found. Try adjusting your search or filters.
+    <!-- Skeleton for first paint (SSR) -->
+    <div v-if="!hydrated && !storeError" class="grid cols-4" aria-hidden="true">
+      <div v-for="i in 8" :key="i" class="card" style="height: 280px; background:linear-gradient(135deg, rgba(59,130,246,.06), rgba(249,250,251,1));"></div>
     </div>
 
+    <!-- Real content -->
     <div v-if="!storeError" class="grid cols-4">
       <BookCard v-for="b in filtered" :key="b.id" :book="b" />
     </div>
 
-    <div v-else style="margin-top:1rem;">
+    <div v-if="!storeError && hydrated && !filtered.length" class="alert" role="status" aria-live="polite" style="margin-top:.75rem;">
+      No books found. Try adjusting your search or filters.
+    </div>
+
+    <div v-else-if="storeError" style="margin-top:1rem;">
       <p>Ocean Library is running. Try the health checks:</p>
       <ul>
         <li><a href="/health" target="_self" rel="noopener">/health</a></li>
@@ -43,14 +58,24 @@
 </template>
 
 <script setup lang="ts">
+// PUBLIC_INTERFACE
+/**
+ * Home page renders SSR-visible skeleton and toolbar immediately,
+ * then hydrates client state after mount to avoid any splash screen.
+ */
 useHead({ title: 'Books' });
-const { list, uniqueTags } = useBooks();
+
+// Defer any client-only operations to mounted
+const hydrated = ref(false);
 
 const q = ref('');
 const tag = ref('');
 const storeError = ref(false);
 
-const safeList = () => {
+// Access composable (safe on SSR; it guards localStorage internally)
+const { list, uniqueTags } = useBooks();
+
+const books = computed(() => {
   try {
     return list();
   } catch (e) {
@@ -59,8 +84,9 @@ const safeList = () => {
     storeError.value = true;
     return [];
   }
-};
-const safeTags = () => {
+});
+
+const allTags = computed(() => {
   try {
     return uniqueTags();
   } catch (e) {
@@ -69,10 +95,7 @@ const safeTags = () => {
     storeError.value = true;
     return [];
   }
-};
-
-const books = computed(() => safeList());
-const allTags = computed(() => safeTags());
+});
 
 const filtered = computed(() => {
   const needle = q.value.trim().toLowerCase();
@@ -90,4 +113,9 @@ function clearFilters() {
   q.value = '';
   tag.value = '';
 }
+
+onMounted(() => {
+  // Mark hydration complete after client mount to switch from skeleton to real content guards
+  hydrated.value = true;
+});
 </script>

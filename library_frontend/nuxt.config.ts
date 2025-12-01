@@ -113,6 +113,7 @@ export default defineNuxtConfig({
         'vscode-internal-34023-qa.qa01.cloud.kavia.ai',
         // include common preview subdomain patterns just in case proxies rewrite:
         'vscode-internal-*.qa01.cloud.kavia.ai',
+        '*.qa01.cloud.kavia.ai',
         '*.cloud.kavia.ai',
         ...String(process.env.ALLOWED_HOSTS || '')
           .split(',')

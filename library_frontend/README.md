@@ -35,6 +35,7 @@ Visit: http://localhost:3000
 - Server health: `GET /health` returns `OK`
 - API health: `GET /api/health` returns `{ status: 'ok', timestamp }`
 - The top blue banner in the UI shows "SSR OK" to confirm server-side render; it toggles to "Hydrated" when the client has mounted.
+- If you still see the Nuxt logo splash, ensure that your preview host is allowed (see Vite/Nuxt allowedHosts) and reload. The home page always SSR-renders a skeleton grid so you should never see a blank page.
 
 If you only see the Nuxt logo, check browser console for hydration errors and visit `/health` to ensure the server is reachable.
 

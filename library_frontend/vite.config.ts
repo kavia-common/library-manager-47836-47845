@@ -17,7 +17,7 @@ const hardcodedHost = 'vscode-internal-34023-qa.qa01.cloud.kavia.ai';
 // allow common proxy rewrites and wildcard domain
 const variantHosts = ['vscode-internal-*.qa01.cloud.kavia.ai'];
 const envAllowedHosts = parseCsv(process.env.ALLOWED_HOSTS);
-const wildcardHosts = ['*.cloud.kavia.ai'];
+const wildcardHosts = ['*.qa01.cloud.kavia.ai', '*.cloud.kavia.ai'];
 const allowedHosts = Array.from(new Set([hardcodedHost, ...variantHosts, ...wildcardHosts, ...envAllowedHosts]));
 const port = Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000);
 
