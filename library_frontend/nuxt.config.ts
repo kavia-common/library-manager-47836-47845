@@ -98,8 +98,8 @@ export default defineNuxtConfig({
     preset: process.env.NITRO_PRESET || undefined
   },
   vite: {
-    // Respect NUXT_PUBLIC_PORT if provided; fallback to 3000
-    // Mirror allowedHosts here to avoid merge/override issues in Nuxt.
+    // Respect NUXT_PUBLIC_PORT if provided; fallback to 3000.
+    // Mirror allowedHosts/HMR here to avoid merge/override issues when Nuxt merges external vite.config.ts.
     server: {
       host: true, // listen on 0.0.0.0
       port: Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000),

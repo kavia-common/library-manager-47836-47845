@@ -1,6 +1,11 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
 
+/**
+ * Note: Nuxt merges this vite.config.ts with its internal Vite config and any `vite` block from nuxt.config.ts.
+ * We keep values consistent to avoid conflicts. This file mainly centralizes allowedHosts/HMR behavior for preview proxies.
+ */
+
 // Utility to parse comma-separated env list
 function parseCsv(envVar?: string): string[] {
   if (!envVar) return [];
@@ -12,14 +17,16 @@ const hardcodedHost = 'vscode-internal-34023-qa.qa01.cloud.kavia.ai';
 const envAllowedHosts = parseCsv(process.env.ALLOWED_HOSTS);
 const allowedHosts = Array.from(new Set([hardcodedHost, ...envAllowedHosts]));
 const port = Number(process.env.NUXT_PUBLIC_PORT || process.env.PORT || 3000);
-const hmrClientPort = process.env.HMR_CLIENT_PORT
-  ? Number(process.env.HMR_CLIENT_PORT)
-  : process.env.NUXT_PUBLIC_PORT
-    ? Number(process.env.NUXT_PUBLIC_PORT)
-    : undefined;
+
+// Prefer explicit HMR client port when behind TLS proxies; fall back to same as port
+const hmrClientPort =
+  process.env.HMR_CLIENT_PORT
+    ? Number(process.env.HMR_CLIENT_PORT)
+    : process.env.NUXT_PUBLIC_PORT
+      ? Number(process.env.NUXT_PUBLIC_PORT)
+      : undefined;
 
 export default defineConfig({
-  // Keep config Nuxt-compatible; Nuxt merges this into its own Vite config.
   server: {
     host: true,          // listen on 0.0.0.0
     port,

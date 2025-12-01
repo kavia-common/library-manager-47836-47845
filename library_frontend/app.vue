@@ -29,6 +29,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
+
 const isHydrated = ref(false);
 onMounted(() => {
   // Mark hydration done on client; avoids using browser APIs during SSR.
